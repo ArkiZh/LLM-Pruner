@@ -43,7 +43,7 @@ class LoggerWithDepth():
             f.write('python ' + ' '.join(sys.argv))
 
         # Setup File/Stream Writer
-        log_format=logging.Formatter("%(asctime)s - %(levelname)s :       %(message)s", "%Y-%m-%d %H:%M:%S")
+        log_format=logging.Formatter("%(asctime)s - %(levelname)s ========= %(message)s", "%Y-%m-%d %H:%M:%S")
         
         self.writer = logging.getLogger()
         fileHandler = logging.FileHandler(os.path.join(self.sub_dir, "training.log"))

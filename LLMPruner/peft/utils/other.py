@@ -38,8 +38,9 @@ def prepare_model_for_int8_training(
 ):
     r"""
     This method wraps the entire protocol for preparing a model before running a training. This includes:
-        1- Cast the layernorm in fp32 2- making output embedding layer require grads 3- Add the upcasting of the lm
-        head to fp32
+        1- Cast the layernorm in fp32
+        2- making output embedding layer require grads
+        3- Add the upcasting of the lm head to fp32
 
     Args:
         model, (`transformers.PreTrainedModel`):

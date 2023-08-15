@@ -45,7 +45,7 @@ def main(args):
         model.half()
     model.to(args.device)
 
-    if args.test_before_train:
+    if not args.skip_test_before_train:
         logger.log("\n==================Generation Results before Pruning================\n")
         model.eval()
         with torch.no_grad():
@@ -193,7 +193,7 @@ def main(args):
         for i in range(args.iterative_steps):
 
             if pruner_type in ['taylor']:
-                example_prompts = get_examples('bookcorpus', tokenizer, 10, seq_len = 64)
+                example_prompts = get_examples('bookcorpus', tokenizer, 10, seq_len = 64).to(args.device)
                 logger.log("Start Backwarding in iterative steps = {}...".format(i))
                 loss = model(example_prompts, labels=example_prompts).loss
                 logger.log("Loss = {}".format(loss))
@@ -227,12 +227,13 @@ def main(args):
     gc.collect()
     torch.cuda.empty_cache()
 
-    if args.save_model:
+    if not args.skip_save_model:
         model.half()
         torch.save({
             'model': model, 
             'tokenizer': tokenizer,
         }, logger.best_checkpoint_path)
+        logger.log(f"Model saved to: {logger.best_checkpoint_path}")
     
     if args.eval_device != "cpu":
         model.half()
@@ -242,7 +243,7 @@ def main(args):
     model.config.bos_token_id = 1
     model.config.eos_token_id = 2
 
-    if args.test_after_train:
+    if not args.skip_test_after_train:
         logger.log("\n==================Generation Results After Pruning================\n")
         
         model.eval()
@@ -274,8 +275,8 @@ if __name__ == "__main__":
     # argument for parsing
     parser.add_argument('--base_model', type=str, default="decapoda-research/llama-7b-hf", help='base model name')
     parser.add_argument('--save_ckpt_log_name', type=str, default="llama_prune", help='the path for save the checkpoint and the log. The final path would be log/{your_name_here}_{pruner_type}_{pruning_ratio}')
-    parser.add_argument('--pruning_ratio', type=float, default=0.5, help='pruning ratio')
-    parser.add_argument('--pruner_type', type=str, default='l2', help='pruner type')
+    parser.add_argument('--pruning_ratio', type=float, default=0.25, help='pruning ratio')
+    parser.add_argument('--pruner_type', type=str, default='taylor', help='pruner type')
 
     # argument for generation
     parser.add_argument('--temperature', type=float, default=1.0, help='temperature')
@@ -301,12 +302,12 @@ if __name__ == "__main__":
 
     # general argument
     parser.add_argument('--device', type=str, default="cuda", help='device')
-    parser.add_argument('--test_before_train', action='store_true', help='whether test before train')
+    parser.add_argument('--skip_test_before_train', action='store_true', help='whether test before train')
     parser.add_argument('--eval_device', type=str, default="cuda", help='eval device')
-    parser.add_argument('--test_after_train', action='store_true', help='whether test after train')
+    parser.add_argument('--skip_test_after_train', action='store_true', help='whether test after train')
 
     parser.add_argument('--seed', type=int, default=42, help='seed')
-    parser.add_argument('--save_model', action='store_true', help='if save model')
+    parser.add_argument('--skip_save_model', action='store_true', help='if save model')
     args = parser.parse_args()
 
     torch_version = float('.'.join(torch.__version__.split('.')[:2]))

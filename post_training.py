@@ -192,7 +192,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tuning Pruned LLM')
 
     # Model Type&Path
-    parser.add_argument('--base_model', type=str, default="decapoda-research/llama-7b-hf", help='base model name')
     parser.add_argument('--prune_model', type=str, help='prune model name')
     parser.add_argument('--data_path', type=str, default="yahma/alpaca-cleaned", help='data path')
     parser.add_argument('--extra_val_dataset', type=str, default=None, help='validation datasets. Split with ","')

@@ -19,7 +19,11 @@ torch_version = int(torch.__version__.split('.')[1])
 
 def main(args):
     if args.model_type == 'pretrain':
-        tokenizer = AutoTokenizer.from_pretrained(args.base_model)
+        if args.base_model=="decapoda-research/llama-7b-hf":
+            from transformers import LlamaTokenizer
+            tokenizer = LlamaTokenizer.from_pretrained(args.base_model)
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(args.base_model)
         model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
             low_cpu_mem_usage=True if torch_version >=9 else False
@@ -61,6 +65,7 @@ def main(args):
         stream_output=False,
         **kwargs,
     ):
+        print("========= Input:", input)
         inputs = tokenizer(input, return_tensors="pt")
         input_ids = inputs["input_ids"].to(device)
 
@@ -74,6 +79,7 @@ def main(args):
                 max_length=max_new_tokens,
                 return_dict_in_generate=True,
             )
+        print("======== generation_output:",generation_output)
         s = generation_output.sequences[0]
         output = tokenizer.decode(s)
         yield output
