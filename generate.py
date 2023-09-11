@@ -114,6 +114,7 @@ def main(args):
 
 
 if __name__ == "__main__":
+    sys.argv.extend("--model_type pruneLLM --ckpt prune_log/llama_prune/pytorch_model.bin".split())
     parser = argparse.ArgumentParser(description='Tuning Pruned LLaMA (huggingface version)')
 
     parser.add_argument('--base_model', type=str, default="decapoda-research/llama-7b-hf", help='base model name')

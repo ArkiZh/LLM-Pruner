@@ -44,7 +44,8 @@ def main(args):
     if args.device != "cpu":
         model.half()
     model.to(args.device)
-
+    import util
+    util.model_info(model, "Before prune.")
     if not args.skip_test_before_train:
         logger.log("\n==================Generation Results before Pruning================\n")
         model.eval()
@@ -222,8 +223,9 @@ def main(args):
 
     else:
         raise NotImplementedError
+    util.model_info(model, "After prune.")
     logger.log("#Param before: {}, #Param after: {}, Ratio = {:.4f}%".format(before_pruning_parameters, after_pruning_parameters,  100.0*after_pruning_parameters/before_pruning_parameters))
-    
+
     gc.collect()
     torch.cuda.empty_cache()
 
@@ -269,7 +271,8 @@ def main(args):
     logger.log("PPL after pruning: {}".format(ppl))
     logger.log("Memory Requirement: {} MiB\n".format(torch.cuda.memory_allocated()/1024/1024))
 
-if __name__ == "__main__":
+
+def parse_args():
     parser = argparse.ArgumentParser(description='Pruning LLaMA (huggingface version)')
 
     # argument for parsing
@@ -312,4 +315,10 @@ if __name__ == "__main__":
 
     torch_version = float('.'.join(torch.__version__.split('.')[:2]))
     args.torch_version = torch_version
+    return args
+
+
+if __name__ == "__main__":
+    sys.argv.extend("--base_model decapoda-research/llama-7b-hf --block_wise ".split())
+    args = parse_args()
     main(args)
